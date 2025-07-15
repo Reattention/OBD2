@@ -151,7 +151,7 @@ class BMWDiagnostics:
                 obd.commands.TIMING_ADVANCE,
                 obd.commands.FUEL_LEVEL,
                 obd.commands.BAROMETRIC_PRESSURE,
-                obd.commands.AMBIENT_AIR_TEMP,
+                obd.commands.AMBIANT_AIR_TEMP,
                 obd.commands.CONTROL_MODULE_VOLTAGE
             ]
             

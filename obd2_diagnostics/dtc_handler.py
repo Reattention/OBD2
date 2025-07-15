@@ -157,6 +157,96 @@ class DTCHandler:
             'U0140': 'Lost Communication with Body Control Module',
             'U0141': 'Lost Communication with Body Control Module "A"',
             'U0155': 'Lost Communication with Instrument Panel Control Module',
+            
+            # N57D30 Diesel Engine Specific DTCs
+            # Diesel Particulate Filter (DPF) Codes
+            'P2002': 'Particulate Filter Efficiency Below Threshold (Bank 1)',
+            'P2003': 'Particulate Filter Efficiency Below Threshold (Bank 2)', 
+            'P2463': 'Diesel Particulate Filter Soot Accumulation',
+            'P2464': 'Diesel Particulate Filter Temperature Too High',
+            'P2465': 'Diesel Particulate Filter Temperature Too Low',
+            'P244A': 'Diesel Particulate Filter Differential Pressure Too Low',
+            'P244B': 'Diesel Particulate Filter Differential Pressure Too High',
+            'P244C': 'Diesel Particulate Filter Differential Pressure Sensor Circuit',
+            
+            # Exhaust Gas Recirculation (EGR) Codes
+            'P0401': 'Exhaust Gas Recirculation Flow Insufficient Detected',
+            'P0402': 'Exhaust Gas Recirculation Flow Excessive Detected',
+            'P0403': 'Exhaust Gas Recirculation Circuit Malfunction',
+            'P0404': 'Exhaust Gas Recirculation Circuit Range/Performance',
+            'P0405': 'Exhaust Gas Recirculation Sensor A Circuit Low',
+            'P0406': 'Exhaust Gas Recirculation Sensor A Circuit High',
+            'P0407': 'Exhaust Gas Recirculation Sensor B Circuit Low',
+            'P0408': 'Exhaust Gas Recirculation Sensor B Circuit High',
+            
+            # NOx Sensor and SCR System Codes
+            'P20EE': 'Selective Catalyst Reduction NOx Catalyst Efficiency Below Threshold',
+            'P20EF': 'Selective Catalyst Reduction NOx Catalyst Efficiency Below Threshold Bank 2',
+            'P2200': 'NOx Sensor Circuit Bank 1',
+            'P2201': 'NOx Sensor Circuit Range/Performance Bank 1',
+            'P2202': 'NOx Sensor Circuit Low Bank 1',
+            'P2203': 'NOx Sensor Circuit High Bank 1',
+            'P2204': 'NOx Sensor Circuit Intermittent Bank 1',
+            'P2205': 'NOx Sensor Circuit Bank 2',
+            'P2206': 'NOx Sensor Circuit Range/Performance Bank 2',
+            'P2207': 'NOx Sensor Circuit Low Bank 2',
+            'P2208': 'NOx Sensor Circuit High Bank 2',
+            'P2209': 'NOx Sensor Circuit Intermittent Bank 2',
+            
+            # DEF (Diesel Exhaust Fluid) / AdBlue System Codes
+            'P229F': 'DEF Pump Control Circuit/Open',
+            'P22A0': 'DEF Pump Control Circuit Low',
+            'P22A1': 'DEF Pump Control Circuit High',
+            'P22A2': 'DEF Pump Control Circuit Range/Performance',
+            'P204F': 'Reductant System Performance',
+            'P2043': 'Reductant Temperature Sensor Circuit Bank 1',
+            'P2044': 'Reductant Temperature Sensor Circuit Range/Performance Bank 1',
+            'P2045': 'Reductant Temperature Sensor Circuit Low Bank 1',
+            'P2046': 'Reductant Temperature Sensor Circuit High Bank 1',
+            'P205B': 'Reductant Level Sensor Circuit',
+            'P205C': 'Reductant Level Sensor Circuit Range/Performance',
+            'P205D': 'Reductant Level Sensor Circuit Low',
+            'P205E': 'Reductant Level Sensor Circuit High',
+            
+            # Diesel Turbocharger (VNT/VGT) Codes
+            'P0299': 'Turbocharger/Supercharger A Underboost Condition',
+            'P0234': 'Turbocharger/Supercharger A Overboost Condition',
+            'P0236': 'Turbocharger/Supercharger A Boost Sensor A Circuit Range/Performance',
+            'P0237': 'Turbocharger/Supercharger A Boost Sensor A Circuit Low',
+            'P0238': 'Turbocharger/Supercharger A Boost Sensor A Circuit High',
+            'P2563': 'Turbocharger Boost Control Position Sensor Circuit',
+            'P2564': 'Turbocharger Boost Control Position Sensor Circuit Range/Performance',
+            'P2565': 'Turbocharger Boost Control Position Sensor Circuit Low',
+            'P2566': 'Turbocharger Boost Control Position Sensor Circuit High',
+            'P0045': 'Turbocharger/Supercharger Boost Control Solenoid Circuit/Open',
+            'P0046': 'Turbocharger/Supercharger Boost Control Solenoid Circuit Range/Performance',
+            'P0047': 'Turbocharger/Supercharger Boost Control Solenoid Circuit Low',
+            'P0048': 'Turbocharger/Supercharger Boost Control Solenoid Circuit High',
+            
+            # Diesel Fuel System Codes
+            'P0088': 'Fuel Rail/System Pressure Too High',
+            'P0087': 'Fuel Rail/System Pressure Too Low',
+            'P0089': 'Fuel Pressure Regulator Performance',
+            'P0093': 'Fuel System Leak Detected - Large Leak',
+            'P0094': 'Fuel System Leak Detected - Small Leak',
+            'P018C': 'Fuel Pressure Sensor B Circuit Range/Performance',
+            'P018D': 'Fuel Pressure Sensor B Circuit Low',
+            'P018E': 'Fuel Pressure Sensor B Circuit High',
+            'P018F': 'Fuel Pressure Sensor B Circuit Intermittent/Erratic',
+            
+            # Diesel Glow Plug System Codes
+            'P0380': 'Glow Plug/Heater Circuit A Malfunction',
+            'P0381': 'Glow Plug/Heater Indicator Circuit Malfunction',
+            'P0382': 'Glow Plug/Heater Circuit B Malfunction',
+            'P0383': 'Glow Plug/Heater Circuit B Low',
+            'P0384': 'Glow Plug/Heater Circuit B High',
+            'P0670': 'Glow Plug Module Control Circuit Malfunction',
+            'P0671': 'Cylinder 1 Glow Plug Circuit Malfunction',
+            'P0672': 'Cylinder 2 Glow Plug Circuit Malfunction',
+            'P0673': 'Cylinder 3 Glow Plug Circuit Malfunction',
+            'P0674': 'Cylinder 4 Glow Plug Circuit Malfunction',
+            'P0675': 'Cylinder 5 Glow Plug Circuit Malfunction',
+            'P0676': 'Cylinder 6 Glow Plug Circuit Malfunction',
         }
     
     def read_dtcs(self) -> Tuple[List[DiagnosticTroubleCode], DTCStatus]:
@@ -305,7 +395,10 @@ class DTCHandler:
         
         # Identify priority issues
         priority_codes = ['P0300', 'P0301', 'P0302', 'P0303', 'P0304', 'P0305', 'P0306', 'P0307', 'P0308',
-                         'P0087', 'P0088', 'P1017', 'U0100', 'U0101']
+                         'P0087', 'P0088', 'P1017', 'U0100', 'U0101',
+                         # Diesel-specific priority codes
+                         'P2002', 'P2463', 'P0401', 'P0402', 'P20EE', 'P229F', 'P204F', 
+                         'P0299', 'P0234', 'P0380', 'P0381', 'P0670']
         
         for dtc in dtcs:
             if dtc.code in priority_codes:
@@ -363,7 +456,20 @@ class DTCHandler:
             'P0088': 'High fuel pressure can damage injectors',
             'P1017': 'Valvetronic emergency mode reduces performance',
             'U0100': 'Communication loss with engine control module',
-            'U0101': 'Communication loss with transmission control module'
+            'U0101': 'Communication loss with transmission control module',
+            # Diesel-specific priority reasons
+            'P2002': 'DPF efficiency low - may cause engine derating',
+            'P2463': 'DPF soot accumulation - regeneration required',
+            'P0401': 'EGR flow insufficient - affects emissions',
+            'P0402': 'EGR flow excessive - affects performance',
+            'P20EE': 'NOx catalyst efficiency low - emissions failure',
+            'P229F': 'DEF pump failure - engine will derate',
+            'P204F': 'DEF system performance - emissions system failure',
+            'P0299': 'Turbo underboost - reduced power',
+            'P0234': 'Turbo overboost - potential engine damage',
+            'P0380': 'Glow plug system failure - cold start issues',
+            'P0381': 'Glow plug indicator circuit - starting problems',
+            'P0670': 'Glow plug module failure - cold weather starting'
         }
         
         return priority_reasons.get(code, 'Requires immediate attention')
@@ -389,6 +495,28 @@ class DTCHandler:
         
         if any(code.startswith('C12') for code in codes):
             recommendations.append("Check ABS wheel speed sensors - clean or replace as needed")
+        
+        # Diesel-specific recommendations
+        if any(code in ['P2002', 'P2463', 'P244A', 'P244B'] for code in codes):
+            recommendations.append("DPF issues detected - perform forced regeneration or replace DPF")
+        
+        if any(code.startswith('P040') for code in codes):
+            recommendations.append("EGR system issues - clean EGR valve and check vacuum lines")
+        
+        if any(code in ['P20EE', 'P20EF'] for code in codes):
+            recommendations.append("NOx catalyst efficiency low - check DEF system and SCR catalyst")
+        
+        if any(code.startswith('P229') or code.startswith('P204') or code.startswith('P205') for code in codes):
+            recommendations.append("DEF/AdBlue system issues - check fluid level, quality, and pump operation")
+        
+        if any(code in ['P0299', 'P0234', 'P2563', 'P2564', 'P2565', 'P2566'] for code in codes):
+            recommendations.append("Turbocharger issues - check VNT actuator and boost control system")
+        
+        if any(code.startswith('P067') or code.startswith('P038') for code in codes):
+            recommendations.append("Glow plug system issues - test individual glow plugs and control module")
+        
+        if any(code in ['P0018', 'P0019', 'P0020', 'P0021'] for code in codes):
+            recommendations.append("Timing chain/belt issues - inspect timing components on diesel engine")
         
         if len([d for d in dtcs if d.severity == DTCSeverity.PERMANENT]) > 0:
             recommendations.append("Permanent DTCs detected - complete drive cycle required after repairs")

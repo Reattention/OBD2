@@ -47,6 +47,95 @@ class BMWPIDRegistry:
                 'decoder': self._decode_bmw_injection_timing
             },
             
+            # N57D30 Diesel Engine Specific PIDs
+            'BMW_DPF_PRESSURE_DIFFERENTIAL': {
+                'pid': 0x22D050,
+                'name': 'DPF Pressure Differential',
+                'description': 'Diesel Particulate Filter pressure differential',
+                'unit': Unit.kilopascal,
+                'decoder': self._decode_bmw_dpf_pressure
+            },
+            
+            'BMW_DPF_REGENERATION_STATUS': {
+                'pid': 0x22D051,
+                'name': 'DPF Regeneration Status',
+                'description': 'DPF regeneration status and progress',
+                'unit': Unit.percent,
+                'decoder': self._decode_bmw_dpf_status
+            },
+            
+            'BMW_EGR_VALVE_POSITION': {
+                'pid': 0x22D052,
+                'name': 'EGR Valve Position',
+                'description': 'Exhaust Gas Recirculation valve position',
+                'unit': Unit.percent,
+                'decoder': self._decode_bmw_egr_position
+            },
+            
+            'BMW_VNT_TURBO_POSITION': {
+                'pid': 0x22D053,
+                'name': 'VNT Turbo Vane Position',
+                'description': 'Variable Nozzle Turbo vane position',
+                'unit': Unit.percent,
+                'decoder': self._decode_bmw_vnt_position
+            },
+            
+            'BMW_NOX_SENSOR_BANK1': {
+                'pid': 0x22D054,
+                'name': 'NOx Sensor Bank 1',
+                'description': 'NOx sensor reading bank 1',
+                'unit': Unit.dimensionless,  # ppm
+                'decoder': self._decode_bmw_nox_sensor
+            },
+            
+            'BMW_NOX_SENSOR_BANK2': {
+                'pid': 0x22D055,
+                'name': 'NOx Sensor Bank 2', 
+                'description': 'NOx sensor reading bank 2',
+                'unit': Unit.dimensionless,  # ppm
+                'decoder': self._decode_bmw_nox_sensor
+            },
+            
+            'BMW_DEF_TANK_LEVEL': {
+                'pid': 0x22D056,
+                'name': 'DEF Tank Level',
+                'description': 'Diesel Exhaust Fluid tank level',
+                'unit': Unit.percent,
+                'decoder': self._decode_bmw_def_level
+            },
+            
+            'BMW_DEF_QUALITY': {
+                'pid': 0x22D057,
+                'name': 'DEF Quality',
+                'description': 'Diesel Exhaust Fluid quality reading',
+                'unit': Unit.percent,
+                'decoder': self._decode_bmw_def_quality
+            },
+            
+            'BMW_DIESEL_FUEL_TEMP': {
+                'pid': 0x22D058,
+                'name': 'Diesel Fuel Temperature',
+                'description': 'Diesel fuel temperature',
+                'unit': Unit.celsius,
+                'decoder': self._decode_bmw_fuel_temp
+            },
+            
+            'BMW_FUEL_RAIL_PRESSURE_HIGH': {
+                'pid': 0x22D059,
+                'name': 'High Pressure Fuel Rail',
+                'description': 'High-pressure diesel fuel rail pressure',
+                'unit': Unit.bar,
+                'decoder': self._decode_bmw_hp_fuel_pressure
+            },
+            
+            'BMW_DIESEL_INJECTION_TIMING': {
+                'pid': 0x22D05A,
+                'name': 'Diesel Injection Timing',
+                'description': 'Diesel injection timing advance/retard',
+                'unit': Unit.degree,
+                'decoder': self._decode_bmw_diesel_timing
+            },
+            
             # Transmission PIDs (for automatic transmission)
             'BMW_TRANS_TEMP': {
                 'pid': 0x22D010,
@@ -170,6 +259,77 @@ class BMWPIDRegistry:
             voltage = (data[0] * 256 + data[1]) / 1000.0
             return voltage
         return 0.0
+    
+    # N57D30 Diesel Engine Specific Decoders
+    def _decode_bmw_dpf_pressure(self, data: bytes) -> float:
+        """Decode BMW DPF pressure differential"""
+        if len(data) >= 2:
+            pressure = (data[0] * 256 + data[1]) / 100.0  # kPa
+            return pressure
+        return 0.0
+    
+    def _decode_bmw_dpf_status(self, data: bytes) -> float:
+        """Decode BMW DPF regeneration status"""
+        if len(data) >= 1:
+            status = data[0] / 2.55  # Convert to percentage
+            return status
+        return 0.0
+    
+    def _decode_bmw_egr_position(self, data: bytes) -> float:
+        """Decode BMW EGR valve position"""
+        if len(data) >= 1:
+            position = data[0] / 2.55  # Convert to percentage
+            return position
+        return 0.0
+    
+    def _decode_bmw_vnt_position(self, data: bytes) -> float:
+        """Decode BMW VNT turbo vane position"""
+        if len(data) >= 1:
+            position = data[0] / 2.55  # Convert to percentage
+            return position
+        return 0.0
+    
+    def _decode_bmw_nox_sensor(self, data: bytes) -> float:
+        """Decode BMW NOx sensor reading"""
+        if len(data) >= 2:
+            nox_ppm = (data[0] * 256 + data[1]) / 10.0  # ppm
+            return nox_ppm
+        return 0.0
+    
+    def _decode_bmw_def_level(self, data: bytes) -> float:
+        """Decode BMW DEF tank level"""
+        if len(data) >= 1:
+            level = data[0] / 2.55  # Convert to percentage
+            return level
+        return 0.0
+    
+    def _decode_bmw_def_quality(self, data: bytes) -> float:
+        """Decode BMW DEF quality"""
+        if len(data) >= 1:
+            quality = data[0] / 2.55  # Convert to percentage
+            return quality
+        return 0.0
+    
+    def _decode_bmw_fuel_temp(self, data: bytes) -> float:
+        """Decode BMW diesel fuel temperature"""
+        if len(data) >= 1:
+            temp = data[0] - 40.0  # °C
+            return temp
+        return 0.0
+    
+    def _decode_bmw_hp_fuel_pressure(self, data: bytes) -> float:
+        """Decode BMW high-pressure diesel fuel rail pressure"""
+        if len(data) >= 2:
+            pressure = (data[0] * 256 + data[1]) / 10.0  # bar
+            return pressure
+        return 0.0
+    
+    def _decode_bmw_diesel_timing(self, data: bytes) -> float:
+        """Decode BMW diesel injection timing"""
+        if len(data) >= 2:
+            timing = ((data[0] * 256 + data[1]) / 128.0) - 210.0  # degrees
+            return timing
+        return 0.0
 
 
 class StandardPIDMapper:
@@ -187,6 +347,15 @@ class StandardPIDMapper:
             obd.commands.THROTTLE_POS: self._interpret_bmw_throttle,
             obd.commands.FUEL_PRESSURE: self._interpret_bmw_fuel_pressure,
             obd.commands.INTAKE_PRESSURE: self._interpret_bmw_intake_pressure,
+        }
+        
+        # Diesel-specific interpretations
+        self.diesel_specific_notes = {
+            'dpf_notes': 'DPF regeneration typically occurs every 300-600 miles',
+            'egr_notes': 'EGR valve should modulate between 0-100% based on load',
+            'turbo_notes': 'VNT turbo vanes adjust for optimal boost across RPM range',
+            'nox_notes': 'NOx levels should be <500ppm after SCR treatment',
+            'def_notes': 'DEF consumption approximately 3-5% of fuel consumption'
         }
     
     def interpret_value(self, command, value) -> Dict[str, Any]:
@@ -206,9 +375,15 @@ class StandardPIDMapper:
     def _interpret_bmw_engine_load(self, value) -> Dict[str, Any]:
         """BMW-specific engine load interpretation"""
         load_pct = value.magnitude if hasattr(value, 'magnitude') else value
+        interpretation = 'Normal' if load_pct < 85 else 'High Load'
+        
+        # Diesel engine specific notes
+        diesel_note = 'Diesel engines typically run 20-40% load at idle due to higher compression'
+        
         return {
-            'bmw_interpretation': 'Normal' if load_pct < 85 else 'High Load',
-            'bmw_notes': 'BMW N55/N63 engines typically run 15-30% load at idle'
+            'bmw_interpretation': interpretation,
+            'bmw_notes': 'BMW N55/N63 engines typically run 15-30% load at idle',
+            'diesel_notes': diesel_note
         }
     
     def _interpret_bmw_coolant_temp(self, value) -> Dict[str, Any]:
@@ -260,14 +435,16 @@ class StandardPIDMapper:
         """BMW-specific fuel pressure interpretation"""
         return {
             'bmw_interpretation': 'High pressure direct injection',
-            'bmw_notes': 'BMW DI systems operate at 200+ bar'
+            'bmw_notes': 'BMW DI systems operate at 200+ bar',
+            'diesel_notes': 'N57D30 diesel: Common rail pressure 200-2000 bar depending on load'
         }
     
     def _interpret_bmw_intake_pressure(self, value) -> Dict[str, Any]:
         """BMW-specific intake manifold pressure interpretation"""
         return {
             'bmw_interpretation': 'Turbo/supercharged system',
-            'bmw_notes': 'BMW twin-turbo systems in F13 650i'
+            'bmw_notes': 'BMW twin-turbo systems in F13 650i',
+            'diesel_notes': 'N57D30: Single VNT turbocharger with variable geometry'
         }
     
     def _get_bmw_temp_status(self, temp_c: float) -> str:
