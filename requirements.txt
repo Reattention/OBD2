@@ -1,0 +1,3 @@
+obd>=0.7.1
+pyserial>=3.4
+bluetooth-adapters>=0.15.0
