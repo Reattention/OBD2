@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMW OBD2 Advanced Monitoring</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #1f4e79; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status-good { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-danger { color: #dc3545; }
+        .btn { background: #1f4e79; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #2a5a8a; }
+        .metric { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .qr-container { text-align: center; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .alert-warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 BMW OBD2 Advanced Monitoring</h1>
+            <p>Real-time diagnostics and performance analytics - READ-ONLY operation</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>🔗 Mobile Access</h3>
+                <div class="qr-container">
+                    <div id="qr-code"></div>
+                    <p>Scan QR code with your phone for mobile access</p>
+                    <button class="btn" onclick="generateQR()">Generate QR Code</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📊 System Status</h3>
+                <div id="system-status">Loading...</div>
+            </div>
+            
+            <div class="card">
+                <h3>🏁 Performance Analytics</h3>
+                <div id="performance-data">Loading...</div>
+                <button class="btn" onclick="startAccelTimer()">Start 0-60 Timer</button>
+                <button class="btn" onclick="stopAccelTimer()">Stop Timer</button>
+            </div>
+            
+            <div class="card">
+                <h3>🌪️ Turbo Analytics</h3>
+                <div id="turbo-data">Loading...</div>
+            </div>
+            
+            <div class="card">
+                <h3>🔧 Predictive Maintenance</h3>
+                <div id="maintenance-data">Loading...</div>
+            </div>
+            
+            <div class="card">
+                <h3>🚨 Active Alerts</h3>
+                <div id="alerts">No alerts</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource;
+        
+        function initializeRealTimeData() {
+            eventSource = new EventSource('/api/stream');
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                if (data.error) {
+                    console.error('Stream error:', data.error);
+                    return;
+                }
+                
+                updateSystemStatus(data);
+                updatePerformanceData(data);
+                updateTurboData(data);
+                updateAlerts(data.alerts || []);
+            };
+            
+            eventSource.onerror = function(event) {
+                console.error('EventSource failed:', event);
+            };
+        }
+        
+        function updateSystemStatus(data) {
+            const status = document.getElementById('system-status');
+            const connected = data.live_data && !data.live_data.error;
+            
+            status.innerHTML = `
+                <div class="${connected ? 'status-good' : 'status-danger'}">
+                    ${connected ? '✅ Connected' : '❌ Disconnected'}
+                </div>
+                <div>Last Update: ${new Date().toLocaleTimeString()}</div>
+            `;
+        }
+        
+        function updatePerformanceData(data) {
+            const perf = document.getElementById('performance-data');
+            const perfData = data.performance_data;
+            
+            if (perfData && perfData.current_metrics) {
+                const metrics = perfData.current_metrics;
+                perf.innerHTML = `
+                    <div>Speed: <span class="metric">${metrics.speed_mph}</span> mph</div>
+                    <div>G-Force: <span class="metric">${metrics.g_force_longitudinal}</span> G</div>
+                    <div>Power Est: <span class="metric">${metrics.estimated_power_hp}</span> HP</div>
+                `;
+            } else {
+                perf.innerHTML = 'No performance data available';
+            }
+        }
+        
+        function updateTurboData(data) {
+            const turbo = document.getElementById('turbo-data');
+            const liveData = data.live_data;
+            
+            if (liveData && liveData.data) {
+                const boostPressure = liveData.data.INTAKE_PRESSURE?.value || 0;
+                const rpm = liveData.data.RPM?.value || 0;
+                
+                turbo.innerHTML = `
+                    <div>Boost: <span class="metric">${Math.max(0, boostPressure - 14.7).toFixed(1)}</span> PSI</div>
+                    <div>RPM: <span class="metric">${rpm}</span></div>
+                `;
+            } else {
+                turbo.innerHTML = 'No turbo data available';
+            }
+        }
+        
+        function updateAlerts(alerts) {
+            const alertsDiv = document.getElementById('alerts');
+            
+            if (alerts.length === 0) {
+                alertsDiv.innerHTML = '<div class="status-good">No active alerts</div>';
+                return;
+            }
+            
+            let alertsHTML = '';
+            alerts.forEach(alert => {
+                const alertClass = alert.urgency === 'critical' ? 'alert-danger' : 'alert-warning';
+                alertsHTML += `<div class="alert ${alertClass}">${alert.message}</div>`;
+            });
+            
+            alertsDiv.innerHTML = alertsHTML;
+        }
+        
+        function generateQR() {
+            fetch('/api/qr_code')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.qr_code) {
+                        document.getElementById('qr-code').innerHTML = 
+                            `<img src="${data.qr_code}" alt="QR Code" style="max-width: 200px;">`;
+                    }
+                })
+                .catch(error => console.error('Error generating QR code:', error));
+        }
+        
+        function startAccelTimer() {
+            fetch('/api/performance/start_timer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({event_type: '0-60'})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'started') {
+                    alert('0-60 timer started!');
+                } else {
+                    alert('Error starting timer: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => console.error('Error starting timer:', error));
+        }
+        
+        function stopAccelTimer() {
+            fetch('/api/performance/stop_timer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'completed') {
+                    const duration = data.results.duration_seconds;
+                    alert(`0-60 time: ${duration.toFixed(2)} seconds!`);
+                } else {
+                    alert('Error stopping timer: ' + (data.error || 'No active timer'));
+                }
+            })
+            .catch(error => console.error('Error stopping timer:', error));
+        }
+        
+        // Initialize real-time data updates
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeRealTimeData();
+            
+            // Load maintenance data
+            fetch('/api/maintenance/recommendations')
+                .then(response => response.json())
+                .then(data => {
+                    const maintenanceDiv = document.getElementById('maintenance-data');
+                    if (data.vehicle_status) {
+                        const healthScore = data.vehicle_status.overall_health_score;
+                        maintenanceDiv.innerHTML = `
+                            <div>Health Score: <span class="metric ${healthScore > 80 ? 'status-good' : healthScore > 60 ? 'status-warning' : 'status-danger'}">${healthScore}</span>%</div>
+                            <div>Active Alerts: ${data.active_alerts?.length || 0}</div>
+                        `;
+                    }
+                })
+                .catch(error => console.error('Error loading maintenance data:', error));
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
+    </script>
+</body>
+</html>
