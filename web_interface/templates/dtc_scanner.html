@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}DTC Scanner - BMW OBD2 Diagnostics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-exclamation-triangle me-2 bmw-blue"></i>
+                        Diagnostic Trouble Codes
+                    </h2>
+                    <p class="text-muted mb-0">BMW F13 DTC scanner with real-time monitoring</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-primary btn-sm me-2" onclick="scanDTCs()">
+                        <i class="fas fa-search me-1"></i>Scan DTCs
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearDTCs()">
+                        <i class="fas fa-trash me-1"></i>Clear DTCs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DTC Status Overview -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="dtc-status-card">
+                <div class="dtc-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="dtc-info">
+                    <h3 id="total-dtcs">0</h3>
+                    <p>Total DTCs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="dtc-status-card confirmed">
+                <div class="dtc-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="dtc-info">
+                    <h3 id="confirmed-dtcs">0</h3>
+                    <p>Confirmed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="dtc-status-card pending">
+                <div class="dtc-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="dtc-info">
+                    <h3 id="pending-dtcs">0</h3>
+                    <p>Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="dtc-status-card permanent">
+                <div class="dtc-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="dtc-info">
+                    <h3 id="permanent-dtcs">0</h3>
+                    <p>Permanent</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MIL Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="mil-status-card">
+                <div class="mil-indicator" id="mil-indicator">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="mil-info">
+                    <h4>Malfunction Indicator Lamp (MIL)</h4>
+                    <p id="mil-status">Status: Unknown</p>
+                    <small class="text-muted">Check Engine Light Status</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active DTCs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="dtc-table-card">
+                <div class="table-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-list me-2"></i>Active Diagnostic Trouble Codes
+                    </h5>
+                    <div class="table-controls">
+                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="exportDTCs()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="refreshDTCs()">
+                            <i class="fas fa-sync me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped" id="dtc-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Status</th>
+                                <th>Description</th>
+                                <th>System</th>
+                                <th>Severity</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dtc-tbody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    <i class="fas fa-search me-2"></i>Scan for DTCs to view active codes
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BMW-Specific DTCs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bmw-dtc-card">
+                <div class="card-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-car me-2"></i>BMW-Specific Diagnostic Codes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Twin-Turbo Codes (N63)</h6>
+                            <ul class="bmw-code-list">
+                                <li><strong>P0299:</strong> Turbocharger/Supercharger "A" Underboost</li>
+                                <li><strong>P0234:</strong> Turbocharger/Supercharger "A" Overboost</li>
+                                <li><strong>P0235:</strong> Turbocharger/Supercharger "A" Boost Sensor Circuit</li>
+                                <li><strong>P2263:</strong> Turbocharger/Supercharger Boost System Performance</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Valvetronic Codes</h6>
+                            <ul class="bmw-code-list">
+                                <li><strong>P1014:</strong> Valvetronic System Bank 1</li>
+                                <li><strong>P1015:</strong> Valvetronic Motor Position Sensor</li>
+                                <li><strong>P1016:</strong> Valvetronic Motor Current Control</li>
+                                <li><strong>P1017:</strong> Valvetronic Stroke Sensor</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DTC Analysis -->
+    <div class="row">
+        <div class="col-12">
+            <div class="analysis-card">
+                <div class="analysis-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-chart-line me-2"></i>DTC Analysis & Recommendations
+                    </h5>
+                </div>
+                <div class="analysis-content" id="dtc-analysis">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <p>Scan for DTCs to view analysis and recommendations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DTC Detail Modal -->
+<div class="modal fade" id="dtcDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i>DTC Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="dtc-detail-body">
+                <!-- DTC details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="clearSpecificDTC()">Clear This DTC</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentDTCs = [];
+let selectedDTC = null;
+
+// Scan for DTCs
+async function scanDTCs() {
+    showLoading(true);
+    
+    try {
+        const response = await fetch('/api/dtcs');
+        const data = await response.json();
+        
+        if (data.error) {
+            showNotification('Error scanning DTCs: ' + data.error, 'error');
+            return;
+        }
+        
+        currentDTCs = data.dtcs || [];
+        updateDTCDisplay(data);
+        showNotification('DTC scan completed', 'success');
+        
+    } catch (error) {
+        console.error('Error scanning DTCs:', error);
+        showNotification('Failed to scan DTCs: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Clear all DTCs
+async function clearDTCs() {
+    if (!confirm('Are you sure you want to clear all DTCs? This action cannot be undone.')) {
+        return;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const response = await fetch('/api/clear-dtcs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('DTCs cleared successfully', 'success');
+            // Rescan after clearing
+            setTimeout(scanDTCs, 1000);
+        } else {
+            showNotification('Failed to clear DTCs: ' + data.error, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error clearing DTCs:', error);
+        showNotification('Failed to clear DTCs: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Refresh DTCs
+function refreshDTCs() {
+    scanDTCs();
+}
+
+// Update DTC display
+function updateDTCDisplay(data) {
+    // Update status cards
+    document.getElementById('total-dtcs').textContent = data.status?.total_dtcs || 0;
+    document.getElementById('confirmed-dtcs').textContent = data.status?.confirmed || 0;
+    document.getElementById('pending-dtcs').textContent = data.status?.pending || 0;
+    document.getElementById('permanent-dtcs').textContent = data.status?.permanent || 0;
+    
+    // Update MIL status
+    const milIndicator = document.getElementById('mil-indicator');
+    const milStatus = document.getElementById('mil-status');
+    
+    if (data.status?.mil_on) {
+        milIndicator.className = 'mil-indicator mil-on';
+        milStatus.textContent = 'Status: ON (Check Engine Light Active)';
+    } else {
+        milIndicator.className = 'mil-indicator mil-off';
+        milStatus.textContent = 'Status: OFF (No Issues)';
+    }
+    
+    // Update DTC table
+    updateDTCTable(data.dtcs || []);
+    
+    // Update analysis
+    updateDTCAnalysis(data.analysis || {});
+}
+
+// Update DTC table
+function updateDTCTable(dtcs) {
+    const tbody = document.getElementById('dtc-tbody');
+    
+    if (dtcs.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-success">
+                    <i class="fas fa-check-circle me-2"></i>No active diagnostic trouble codes found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let rows = '';
+    dtcs.forEach((dtc, index) => {
+        const severityClass = getSeverityClass(dtc.severity || 'unknown');
+        const statusClass = getStatusClass(dtc.status || 'unknown');
+        
+        rows += `
+            <tr>
+                <td><strong class="text-primary">${dtc.code}</strong></td>
+                <td><span class="badge ${statusClass}">${dtc.status || 'Unknown'}</span></td>
+                <td>${dtc.description || 'No description available'}</td>
+                <td>${dtc.system || 'Unknown'}</td>
+                <td><span class="badge ${severityClass}">${dtc.severity || 'Unknown'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info" onclick="showDTCDetails(${index})">
+                        <i class="fas fa-info"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = rows;
+}
+
+// Get severity badge class
+function getSeverityClass(severity) {
+    switch (severity.toLowerCase()) {
+        case 'critical': return 'bg-danger';
+        case 'high': return 'bg-warning';
+        case 'medium': return 'bg-info';
+        case 'low': return 'bg-success';
+        default: return 'bg-secondary';
+    }
+}
+
+// Get status badge class
+function getStatusClass(status) {
+    switch (status.toLowerCase()) {
+        case 'confirmed': return 'bg-danger';
+        case 'pending': return 'bg-warning';
+        case 'permanent': return 'bg-dark';
+        default: return 'bg-secondary';
+    }
+}
+
+// Show DTC details
+function showDTCDetails(index) {
+    if (index >= 0 && index < currentDTCs.length) {
+        selectedDTC = currentDTCs[index];
+        const modal = new bootstrap.Modal(document.getElementById('dtcDetailModal'));
+        
+        const dtc = selectedDTC;
+        const detailBody = document.getElementById('dtc-detail-body');
+        
+        detailBody.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary">Code Information</h6>
+                    <p><strong>Code:</strong> ${dtc.code}</p>
+                    <p><strong>Status:</strong> <span class="badge ${getStatusClass(dtc.status)}">${dtc.status}</span></p>
+                    <p><strong>System:</strong> ${dtc.system || 'Unknown'}</p>
+                    <p><strong>Severity:</strong> <span class="badge ${getSeverityClass(dtc.severity)}">${dtc.severity}</span></p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary">Additional Information</h6>
+                    <p><strong>First Detected:</strong> ${dtc.first_detected || 'Unknown'}</p>
+                    <p><strong>Occurrence Count:</strong> ${dtc.occurrence_count || 'Unknown'}</p>
+                    <p><strong>BMW Specific:</strong> ${dtc.bmw_specific ? 'Yes' : 'No'}</p>
+                </div>
+            </div>
+            <hr>
+            <h6 class="text-primary">Description</h6>
+            <p>${dtc.description || 'No description available'}</p>
+            
+            ${dtc.freeze_frame ? `
+                <hr>
+                <h6 class="text-primary">Freeze Frame Data</h6>
+                <pre class="bg-dark p-3 rounded">${JSON.stringify(dtc.freeze_frame, null, 2)}</pre>
+            ` : ''}
+            
+            ${dtc.bmw_notes ? `
+                <hr>
+                <h6 class="text-primary">BMW-Specific Notes</h6>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>${dtc.bmw_notes}
+                </div>
+            ` : ''}
+        `;
+        
+        modal.show();
+    }
+}
+
+// Clear specific DTC
+function clearSpecificDTC() {
+    if (!selectedDTC) return;
+    
+    if (!confirm(`Are you sure you want to clear DTC ${selectedDTC.code}?`)) {
+        return;
+    }
+    
+    // For now, just clear all DTCs (individual clearing would need specific API endpoint)
+    clearDTCs();
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('dtcDetailModal'));
+    modal.hide();
+}
+
+// Update DTC analysis
+function updateDTCAnalysis(analysis) {
+    const analysisContent = document.getElementById('dtc-analysis');
+    
+    if (!analysis || Object.keys(analysis).length === 0) {
+        analysisContent.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <p>No analysis data available</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let content = '';
+    
+    // Priority issues
+    if (analysis.priority_issues && analysis.priority_issues.length > 0) {
+        content += `
+            <div class="alert alert-danger">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Priority Issues</h6>
+                <ul class="mb-0">
+                    ${analysis.priority_issues.map(issue => `<li>${issue}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Recommendations
+    if (analysis.recommendations && analysis.recommendations.length > 0) {
+        content += `
+            <div class="alert alert-info">
+                <h6><i class="fas fa-lightbulb me-2"></i>Recommendations</h6>
+                <ul class="mb-0">
+                    ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    // System summary
+    if (analysis.system_summary) {
+        content += `
+            <div class="mt-3">
+                <h6 class="text-primary">System Summary</h6>
+                <div class="row">
+                    ${Object.entries(analysis.system_summary).map(([system, count]) => `
+                        <div class="col-md-3 mb-2">
+                            <div class="system-summary-item">
+                                <strong>${system}:</strong> ${count} issues
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (content) {
+        analysisContent.innerHTML = content;
+    } else {
+        analysisContent.innerHTML = `
+            <div class="text-center text-success py-4">
+                <i class="fas fa-check-circle fa-2x mb-3"></i>
+                <p>No issues detected. Vehicle systems operating normally.</p>
+            </div>
+        `;
+    }
+}
+
+// Export DTCs
+function exportDTCs() {
+    if (currentDTCs.length === 0) {
+        showNotification('No DTCs to export', 'warning');
+        return;
+    }
+    
+    const exportData = {
+        timestamp: new Date().toISOString(),
+        vehicle: 'BMW F13',
+        total_dtcs: currentDTCs.length,
+        dtcs: currentDTCs
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `bmw_dtcs_${new Date().toISOString().slice(0, 19)}.json`;
+    link.click();
+    
+    showNotification('DTCs exported successfully', 'success');
+}
+
+// Show/hide loading overlay
+function showLoading(show) {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+}
+
+// Initialize DTC scanner
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-scan on page load if connected
+    setTimeout(() => {
+        updateConnectionStatus().then(() => {
+            if (connectionStatus) {
+                scanDTCs();
+            }
+        });
+    }, 1000);
+});
+</script>
+
+<style>
+.dtc-status-card {
+    background: var(--bmw-gradient-secondary);
+    border: 1px solid var(--bmw-gray-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.dtc-status-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--bmw-shadow-lg);
+}
+
+.dtc-status-card.confirmed { border-left: 4px solid #f44336; }
+.dtc-status-card.pending { border-left: 4px solid #ff9800; }
+.dtc-status-card.permanent { border-left: 4px solid #9c27b0; }
+
+.dtc-icon {
+    font-size: 2rem;
+    color: var(--bmw-blue);
+    margin-right: 1rem;
+}
+
+.dtc-info h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--bmw-white);
+}
+
+.dtc-info p {
+    margin: 0;
+    color: var(--bmw-silver);
+    font-size: 0.9rem;
+}
+
+.mil-status-card {
+    background: var(--bmw-gradient-secondary);
+    border: 1px solid var(--bmw-gray-light);
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.mil-indicator {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-right: 2rem;
+    transition: all 0.3s ease;
+}
+
+.mil-indicator.mil-on {
+    background: var(--bmw-gradient-primary);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.mil-indicator.mil-off {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    border: 2px solid #4caf50;
+}
+
+.dtc-table-card, .bmw-dtc-card, .analysis-card {
+    background: var(--bmw-gradient-secondary);
+    border: 1px solid var(--bmw-gray-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.bmw-code-list {
+    list-style: none;
+    padding: 0;
+}
+
+.bmw-code-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bmw-gray-light);
+}
+
+.bmw-code-list li:last-child {
+    border-bottom: none;
+}
+
+.analysis-card .alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.system-summary-item {
+    background: rgba(28, 105, 212, 0.1);
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--bmw-blue);
+}
+</style>
+{% endblock %}

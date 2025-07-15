@@ -1,0 +1,577 @@
+/* BMW OBD2 Diagnostics - Premium CSS Styling */
+
+/* BMW Color Variables */
+:root {
+    --bmw-blue: #1C69D4;
+    --bmw-blue-dark: #1557B3;
+    --bmw-blue-light: #4A8AE8;
+    --bmw-white: #FFFFFF;
+    --bmw-black: #000000;
+    --bmw-gray: #2C2C2C;
+    --bmw-gray-light: #3A3A3A;
+    --bmw-gray-dark: #1A1A1A;
+    --bmw-silver: #C0C0C0;
+    
+    /* Gradient Variables */
+    --bmw-gradient-primary: linear-gradient(135deg, var(--bmw-blue) 0%, var(--bmw-blue-dark) 100%);
+    --bmw-gradient-secondary: linear-gradient(135deg, var(--bmw-gray) 0%, var(--bmw-gray-dark) 100%);
+    --bmw-gradient-turbo: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 50%, #4ECDC4 100%);
+    
+    /* Shadow Variables */
+    --bmw-shadow: 0 4px 20px rgba(28, 105, 212, 0.15);
+    --bmw-shadow-lg: 0 8px 40px rgba(28, 105, 212, 0.2);
+    --bmw-shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Global Styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #0D1117 0%, #161B22 50%, #21262D 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--bmw-white);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* BMW Utility Classes */
+.bmw-blue { color: var(--bmw-blue) !important; }
+.bmw-blue-bg { background-color: var(--bmw-blue) !important; }
+.bmw-gradient { background: var(--bmw-gradient-primary) !important; }
+
+/* Navigation Styling */
+.bmw-nav {
+    background: var(--bmw-gradient-secondary) !important;
+    border-bottom: 2px solid var(--bmw-blue);
+    box-shadow: var(--bmw-shadow);
+    backdrop-filter: blur(10px);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: translateY(-2px);
+    text-shadow: 0 4px 8px rgba(28, 105, 212, 0.3);
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin: 0 4px;
+}
+
+.nav-link:hover {
+    background: rgba(28, 105, 212, 0.2);
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    background: var(--bmw-gradient-primary);
+    color: white !important;
+}
+
+/* Connection Status */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.status-indicator.connected {
+    background: rgba(76, 175, 80, 0.2);
+    color: #81C784;
+    border: 1px solid #4CAF50;
+}
+
+.status-indicator.disconnected {
+    background: rgba(244, 67, 54, 0.2);
+    color: #E57373;
+    border: 1px solid #F44336;
+}
+
+.status-indicator .fas {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Main Content */
+.main-content {
+    padding: 0;
+    min-height: calc(100vh - 76px);
+}
+
+/* Cards and Containers */
+.gauge-card, .turbo-card, .param-card, .data-table-card {
+    background: var(--bmw-gradient-secondary);
+    border: 1px solid var(--bmw-gray-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: var(--bmw-shadow);
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.gauge-card::before, .turbo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--bmw-gradient-primary);
+}
+
+.gauge-card:hover, .turbo-card:hover, .param-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--bmw-shadow-lg);
+    border-color: var(--bmw-blue);
+}
+
+/* Gauge Headers */
+.gauge-header, .turbo-header, .param-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.gauge-title, .turbo-title, .param-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--bmw-white);
+    margin: 0;
+}
+
+/* Gauge Containers */
+.gauge-container, .turbo-gauge-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+/* Gauge Values */
+.gauge-value, .turbo-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.gauge-value span, .turbo-value span {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--bmw-blue);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.gauge-value small, .turbo-value small {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--bmw-silver);
+    margin-top: 4px;
+}
+
+/* Status Indicators */
+.gauge-status, .turbo-status {
+    text-align: center;
+    padding: 8px 12px;
+    background: rgba(28, 105, 212, 0.1);
+    border: 1px solid var(--bmw-blue);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--bmw-blue);
+}
+
+/* Digital Displays */
+.digital-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 120px;
+    background: var(--bmw-gradient-primary);
+    border-radius: 12px;
+    margin: 1rem 0;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.digital-value {
+    text-align: center;
+}
+
+.digital-value span {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--bmw-white);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.digital-value small {
+    display: block;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 4px;
+}
+
+.digital-display-small {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(28, 105, 212, 0.1);
+    border-radius: 8px;
+    border: 1px solid var(--bmw-blue);
+}
+
+.digital-display-small span {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--bmw-blue);
+}
+
+/* Thermometer Styling */
+.thermometer-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    min-height: 120px;
+}
+
+.thermometer {
+    width: 20px;
+    height: 100px;
+    background: var(--bmw-gray-light);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.thermometer-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, #4CAF50 0%, #FFC107 50%, #F44336 100%);
+    transition: height 0.5s ease;
+    border-radius: 0 0 10px 10px;
+}
+
+.temp-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--bmw-blue);
+}
+
+/* Progress Bars */
+.progress-container {
+    margin: 1rem 0;
+}
+
+.progress {
+    height: 12px;
+    background: var(--bmw-gray-light);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-bar.bg-gradient {
+    background: var(--bmw-gradient-primary) !important;
+    transition: width 0.5s ease;
+}
+
+.progress-value {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--bmw-blue);
+}
+
+/* Slider Styling */
+.slider-container {
+    margin: 1rem 0;
+}
+
+.slider-track {
+    height: 8px;
+    background: var(--bmw-gray-light);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.slider-fill {
+    height: 100%;
+    background: var(--bmw-gradient-primary);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.param-value {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--bmw-blue);
+}
+
+/* Turbo Specific Styling */
+.turbo-card {
+    background: var(--bmw-gradient-secondary);
+    border: 2px solid var(--bmw-blue);
+    position: relative;
+}
+
+.turbo-card::before {
+    background: var(--bmw-gradient-turbo);
+    height: 4px;
+}
+
+.turbo-info {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bmw-gray-light);
+}
+
+.turbo-info .fw-bold {
+    font-size: 0.9rem;
+}
+
+/* Section Headers */
+.section-header h3 {
+    color: var(--bmw-white);
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.section-header h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--bmw-gradient-primary);
+    border-radius: 2px;
+}
+
+/* Data Table Styling */
+.data-table-card {
+    background: var(--bmw-gradient-secondary);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--bmw-gray-light);
+}
+
+.table-controls .btn {
+    margin-left: 0.5rem;
+}
+
+.table-dark {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(28, 105, 212, 0.1);
+    --bs-table-border-color: var(--bmw-gray-light);
+}
+
+.table-dark thead th {
+    border-bottom: 2px solid var(--bmw-blue);
+    background: var(--bmw-gradient-primary);
+    font-weight: 600;
+}
+
+.table-dark tbody tr:hover {
+    background: rgba(28, 105, 212, 0.2);
+}
+
+/* Buttons */
+.btn-outline-primary {
+    border-color: var(--bmw-blue);
+    color: var(--bmw-blue);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: var(--bmw-blue);
+    border-color: var(--bmw-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(28, 105, 212, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: var(--bmw-silver);
+    color: var(--bmw-silver);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bmw-silver);
+    border-color: var(--bmw-silver);
+    color: var(--bmw-black);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 17, 23, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: var(--bmw-white);
+}
+
+.loading-spinner .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-color: var(--bmw-blue);
+    border-right-color: transparent;
+}
+
+/* Toast Notifications */
+.toast {
+    background: var(--bmw-gradient-secondary);
+    border: 1px solid var(--bmw-blue);
+    color: var(--bmw-white);
+}
+
+.toast-header {
+    background: var(--bmw-gradient-primary);
+    border-bottom: 1px solid var(--bmw-blue);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .gauge-value span, .turbo-value span {
+        font-size: 1.8rem;
+    }
+    
+    .digital-value span {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 0 10px;
+    }
+    
+    .gauge-card, .turbo-card, .param-card {
+        margin-bottom: 1rem;
+    }
+    
+    .gauge-value span, .turbo-value span {
+        font-size: 1.5rem;
+    }
+    
+    .digital-value span {
+        font-size: 2rem;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .table-controls {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .gauge-title, .turbo-title, .param-title {
+        font-size: 1rem;
+    }
+    
+    .gauge-value span, .turbo-value span {
+        font-size: 1.3rem;
+    }
+    
+    .digital-value span {
+        font-size: 1.8rem;
+    }
+    
+    .section-header h3 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gauge-card, .turbo-card, .param-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.gauge-card:nth-child(1) { animation-delay: 0.1s; }
+.gauge-card:nth-child(2) { animation-delay: 0.2s; }
+.gauge-card:nth-child(3) { animation-delay: 0.3s; }
+.gauge-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bmw-gray-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bmw-blue);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bmw-blue-light);
+}
