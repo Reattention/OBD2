@@ -1,0 +1,846 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - BMW OBD2 Diagnostics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-cog me-2 bmw-blue"></i>
+                        Settings & Configuration
+                    </h2>
+                    <p class="text-muted mb-0">Configure BMW OBD2 diagnostics and adapter settings</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-success btn-sm" onclick="saveSettings()">
+                        <i class="fas fa-save me-1"></i>Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Settings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-plug me-2"></i>Connection Settings
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="adapter-type" class="form-label">Adapter Type</label>
+                                <select class="form-select" id="adapter-type">
+                                    <option value="auto">Auto-detect</option>
+                                    <option value="elm327">ELM327</option>
+                                    <option value="obdlink">OBDLink</option>
+                                    <option value="scantool">ScanTool</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="connection-type" class="form-label">Connection Type</label>
+                                <select class="form-select" id="connection-type">
+                                    <option value="auto">Auto-detect</option>
+                                    <option value="usb">USB</option>
+                                    <option value="bluetooth">Bluetooth</option>
+                                    <option value="wifi">WiFi</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="port" class="form-label">Port</label>
+                                <input type="text" class="form-control" id="port" placeholder="Auto-detect or specify (e.g., COM3, /dev/ttyUSB0)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="baudrate" class="form-label">Baud Rate</label>
+                                <select class="form-select" id="baudrate">
+                                    <option value="38400">38400</option>
+                                    <option value="115200">115200</option>
+                                    <option value="500000">500000</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="timeout" class="form-label">Timeout (seconds)</label>
+                                <input type="number" class="form-control" id="timeout" value="10" min="5" max="30">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="protocol" class="form-label">Protocol</label>
+                                <select class="form-select" id="protocol">
+                                    <option value="AUTO">Auto-detect</option>
+                                    <option value="ISO 15765-4 (CAN)">ISO 15765-4 (CAN)</option>
+                                    <option value="ISO 14230-4 (KWP2000)">ISO 14230-4 (KWP2000)</option>
+                                    <option value="ISO 9141-2">ISO 9141-2</option>
+                                    <option value="SAE J1850 PWM">SAE J1850 PWM</option>
+                                    <option value="SAE J1850 VPW">SAE J1850 VPW</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BMW Vehicle Settings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-car me-2"></i>BMW Vehicle Settings
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="bmw-generation" class="form-label">BMW Generation</label>
+                                <select class="form-select" id="bmw-generation">
+                                    <option value="F13">F13 (6 Series 2011-2018)</option>
+                                    <option value="F12">F12 (6 Series Convertible)</option>
+                                    <option value="F06">F06 (6 Series Gran Coupe)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="model-year" class="form-label">Model Year</label>
+                                <select class="form-select" id="model-year">
+                                    <option value="">Select Year</option>
+                                    <option value="2011">2011</option>
+                                    <option value="2012">2012</option>
+                                    <option value="2013">2013</option>
+                                    <option value="2014">2014</option>
+                                    <option value="2015">2015</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2018">2018</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="engine-type" class="form-label">Engine Type</label>
+                                <select class="form-select" id="engine-type">
+                                    <option value="">Select Engine</option>
+                                    <option value="N63">N63 (4.4L Twin-Turbo V8)</option>
+                                    <option value="N55">N55 (3.0L Single-Turbo I6)</option>
+                                    <option value="N52">N52 (3.0L Naturally Aspirated I6)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="bmw-extended-pids" checked>
+                                <label class="form-check-label" for="bmw-extended-pids">
+                                    Enable BMW Extended PIDs
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    Enables BMW-specific diagnostic parameters and enhanced monitoring
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Settings -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-desktop me-2"></i>Display Settings
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="mb-3">
+                        <label for="theme" class="form-label">Theme</label>
+                        <select class="form-select" id="theme">
+                            <option value="dark">Dark (BMW Style)</option>
+                            <option value="light">Light</option>
+                            <option value="auto">Auto (System)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="units" class="form-label">Unit System</label>
+                        <select class="form-select" id="units">
+                            <option value="metric">Metric (°C, km/h, kPa)</option>
+                            <option value="imperial">Imperial (°F, mph, PSI)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="refresh-rate" class="form-label">Refresh Rate</label>
+                        <select class="form-select" id="refresh-rate">
+                            <option value="500">0.5 seconds (High)</option>
+                            <option value="1000">1 second (Normal)</option>
+                            <option value="2000">2 seconds (Low)</option>
+                            <option value="5000">5 seconds (Minimal)</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="animations" checked>
+                        <label class="form-check-label" for="animations">
+                            Enable Animations
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-bell me-2"></i>Notification Settings
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifications-enabled" checked>
+                        <label class="form-check-label" for="notifications-enabled">
+                            Enable Notifications
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="dtc-alerts" checked>
+                        <label class="form-check-label" for="dtc-alerts">
+                            DTC Alerts
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="connection-alerts" checked>
+                        <label class="form-check-label" for="connection-alerts">
+                            Connection Alerts
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="performance-alerts">
+                        <label class="form-check-label" for="performance-alerts">
+                            Performance Alerts
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alert-sound" class="form-label">Alert Sound</label>
+                        <select class="form-select" id="alert-sound">
+                            <option value="none">None</option>
+                            <option value="beep">Beep</option>
+                            <option value="chime">Chime</option>
+                            <option value="notification">Notification</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Turbo Monitoring Settings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-wind me-2"></i>Dual Turbo Monitoring Settings
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="turbo-units" class="form-label">Pressure Units</label>
+                                <select class="form-select" id="turbo-units">
+                                    <option value="psi">PSI (Pounds per Square Inch)</option>
+                                    <option value="kpa">kPa (Kilopascals)</option>
+                                    <option value="bar">Bar</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="turbo-precision" class="form-label">Display Precision</label>
+                                <select class="form-select" id="turbo-precision">
+                                    <option value="0">0 decimal places</option>
+                                    <option value="1" selected>1 decimal place</option>
+                                    <option value="2">2 decimal places</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="boost-warning" class="form-label">Boost Warning (PSI)</label>
+                                <input type="number" class="form-control" id="boost-warning" value="12.0" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="boost-danger" class="form-label">Boost Danger (PSI)</label>
+                                <input type="number" class="form-control" id="boost-danger" value="15.0" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="vacuum-warning" class="form-label">Vacuum Warning (PSI)</label>
+                                <input type="number" class="form-control" id="vacuum-warning" value="-12.0" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="turbo-logging" checked>
+                        <label class="form-check-label" for="turbo-logging">
+                            Enable Turbo Data Logging
+                        </label>
+                        <small class="form-text text-muted d-block">
+                            Log turbo pressure data for analysis and troubleshooting
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-cogs me-2"></i>Advanced Settings
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="retry-attempts" class="form-label">Retry Attempts</label>
+                                <input type="number" class="form-control" id="retry-attempts" value="3" min="1" max="10">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="reconnect-delay" class="form-label">Reconnect Delay (seconds)</label>
+                                <input type="number" class="form-control" id="reconnect-delay" value="2" min="1" max="10" step="0.5">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="fast-mode" checked>
+                                <label class="form-check-label" for="fast-mode">
+                                    Fast Mode
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    Enable faster OBD2 communication (may not work with all adapters)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="debug-mode">
+                                <label class="form-check-label" for="debug-mode">
+                                    Debug Mode
+                                </label>
+                                <small class="form-text text-muted d-block">
+                                    Enable detailed logging for troubleshooting
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-info-circle me-2"></i>System Information
+                    </h5>
+                </div>
+                <div class="settings-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Application Version:</strong></td>
+                                    <td>1.0.0 Premium</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>WebSocket Status:</strong></td>
+                                    <td><span id="websocket-status" class="badge bg-secondary">Unknown</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Last Connection:</strong></td>
+                                    <td id="last-connection">Never</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Browser:</strong></td>
+                                    <td id="browser-info">Unknown</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Screen Resolution:</strong></td>
+                                    <td id="screen-resolution">Unknown</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Data Usage:</strong></td>
+                                    <td id="data-usage">0 KB</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-warning btn-sm me-2" onclick="resetSettings()">
+                            <i class="fas fa-undo me-1"></i>Reset to Defaults
+                        </button>
+                        <button class="btn btn-outline-info btn-sm me-2" onclick="exportSettings()">
+                            <i class="fas fa-download me-1"></i>Export Settings
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="importSettings()">
+                            <i class="fas fa-upload me-1"></i>Import Settings
+                        </button>
+                        <input type="file" id="import-file" style="display: none;" accept=".json">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Settings object to store all configuration
+let settings = {
+    connection: {
+        adapterType: 'auto',
+        connectionType: 'auto',
+        port: '',
+        baudrate: 38400,
+        timeout: 10,
+        protocol: 'AUTO'
+    },
+    bmw: {
+        generation: 'F13',
+        modelYear: '',
+        engineType: '',
+        extendedPids: true
+    },
+    display: {
+        theme: 'dark',
+        units: 'metric',
+        refreshRate: 1000,
+        animations: true
+    },
+    notifications: {
+        enabled: true,
+        dtcAlerts: true,
+        connectionAlerts: true,
+        performanceAlerts: false,
+        alertSound: 'none'
+    },
+    turbo: {
+        units: 'psi',
+        precision: 1,
+        boostWarning: 12.0,
+        boostDanger: 15.0,
+        vacuumWarning: -12.0,
+        logging: true
+    },
+    advanced: {
+        retryAttempts: 3,
+        reconnectDelay: 2,
+        fastMode: true,
+        debugMode: false
+    }
+};
+
+// Load settings from localStorage
+function loadSettings() {
+    const saved = localStorage.getItem('bmw-obd2-settings');
+    if (saved) {
+        try {
+            settings = { ...settings, ...JSON.parse(saved) };
+        } catch (error) {
+            console.error('Error loading settings:', error);
+        }
+    }
+    
+    // Apply settings to form elements
+    applySettingsToForm();
+}
+
+// Apply settings to form elements
+function applySettingsToForm() {
+    // Connection settings
+    document.getElementById('adapter-type').value = settings.connection.adapterType;
+    document.getElementById('connection-type').value = settings.connection.connectionType;
+    document.getElementById('port').value = settings.connection.port;
+    document.getElementById('baudrate').value = settings.connection.baudrate;
+    document.getElementById('timeout').value = settings.connection.timeout;
+    document.getElementById('protocol').value = settings.connection.protocol;
+    
+    // BMW settings
+    document.getElementById('bmw-generation').value = settings.bmw.generation;
+    document.getElementById('model-year').value = settings.bmw.modelYear;
+    document.getElementById('engine-type').value = settings.bmw.engineType;
+    document.getElementById('bmw-extended-pids').checked = settings.bmw.extendedPids;
+    
+    // Display settings
+    document.getElementById('theme').value = settings.display.theme;
+    document.getElementById('units').value = settings.display.units;
+    document.getElementById('refresh-rate').value = settings.display.refreshRate;
+    document.getElementById('animations').checked = settings.display.animations;
+    
+    // Notification settings
+    document.getElementById('notifications-enabled').checked = settings.notifications.enabled;
+    document.getElementById('dtc-alerts').checked = settings.notifications.dtcAlerts;
+    document.getElementById('connection-alerts').checked = settings.notifications.connectionAlerts;
+    document.getElementById('performance-alerts').checked = settings.notifications.performanceAlerts;
+    document.getElementById('alert-sound').value = settings.notifications.alertSound;
+    
+    // Turbo settings
+    document.getElementById('turbo-units').value = settings.turbo.units;
+    document.getElementById('turbo-precision').value = settings.turbo.precision;
+    document.getElementById('boost-warning').value = settings.turbo.boostWarning;
+    document.getElementById('boost-danger').value = settings.turbo.boostDanger;
+    document.getElementById('vacuum-warning').value = settings.turbo.vacuumWarning;
+    document.getElementById('turbo-logging').checked = settings.turbo.logging;
+    
+    // Advanced settings
+    document.getElementById('retry-attempts').value = settings.advanced.retryAttempts;
+    document.getElementById('reconnect-delay').value = settings.advanced.reconnectDelay;
+    document.getElementById('fast-mode').checked = settings.advanced.fastMode;
+    document.getElementById('debug-mode').checked = settings.advanced.debugMode;
+}
+
+// Collect settings from form
+function collectSettingsFromForm() {
+    return {
+        connection: {
+            adapterType: document.getElementById('adapter-type').value,
+            connectionType: document.getElementById('connection-type').value,
+            port: document.getElementById('port').value,
+            baudrate: parseInt(document.getElementById('baudrate').value),
+            timeout: parseInt(document.getElementById('timeout').value),
+            protocol: document.getElementById('protocol').value
+        },
+        bmw: {
+            generation: document.getElementById('bmw-generation').value,
+            modelYear: document.getElementById('model-year').value,
+            engineType: document.getElementById('engine-type').value,
+            extendedPids: document.getElementById('bmw-extended-pids').checked
+        },
+        display: {
+            theme: document.getElementById('theme').value,
+            units: document.getElementById('units').value,
+            refreshRate: parseInt(document.getElementById('refresh-rate').value),
+            animations: document.getElementById('animations').checked
+        },
+        notifications: {
+            enabled: document.getElementById('notifications-enabled').checked,
+            dtcAlerts: document.getElementById('dtc-alerts').checked,
+            connectionAlerts: document.getElementById('connection-alerts').checked,
+            performanceAlerts: document.getElementById('performance-alerts').checked,
+            alertSound: document.getElementById('alert-sound').value
+        },
+        turbo: {
+            units: document.getElementById('turbo-units').value,
+            precision: parseInt(document.getElementById('turbo-precision').value),
+            boostWarning: parseFloat(document.getElementById('boost-warning').value),
+            boostDanger: parseFloat(document.getElementById('boost-danger').value),
+            vacuumWarning: parseFloat(document.getElementById('vacuum-warning').value),
+            logging: document.getElementById('turbo-logging').checked
+        },
+        advanced: {
+            retryAttempts: parseInt(document.getElementById('retry-attempts').value),
+            reconnectDelay: parseFloat(document.getElementById('reconnect-delay').value),
+            fastMode: document.getElementById('fast-mode').checked,
+            debugMode: document.getElementById('debug-mode').checked
+        }
+    };
+}
+
+// Save settings
+function saveSettings() {
+    try {
+        settings = collectSettingsFromForm();
+        localStorage.setItem('bmw-obd2-settings', JSON.stringify(settings));
+        showNotification('Settings saved successfully', 'success');
+        
+        // Apply theme change immediately
+        if (settings.display.theme === 'light') {
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('light-theme');
+        }
+        
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        showNotification('Failed to save settings: ' + error.message, 'error');
+    }
+}
+
+// Reset settings to defaults
+function resetSettings() {
+    if (!confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+        return;
+    }
+    
+    localStorage.removeItem('bmw-obd2-settings');
+    
+    // Reset to default settings
+    settings = {
+        connection: {
+            adapterType: 'auto',
+            connectionType: 'auto',
+            port: '',
+            baudrate: 38400,
+            timeout: 10,
+            protocol: 'AUTO'
+        },
+        bmw: {
+            generation: 'F13',
+            modelYear: '',
+            engineType: '',
+            extendedPids: true
+        },
+        display: {
+            theme: 'dark',
+            units: 'metric',
+            refreshRate: 1000,
+            animations: true
+        },
+        notifications: {
+            enabled: true,
+            dtcAlerts: true,
+            connectionAlerts: true,
+            performanceAlerts: false,
+            alertSound: 'none'
+        },
+        turbo: {
+            units: 'psi',
+            precision: 1,
+            boostWarning: 12.0,
+            boostDanger: 15.0,
+            vacuumWarning: -12.0,
+            logging: true
+        },
+        advanced: {
+            retryAttempts: 3,
+            reconnectDelay: 2,
+            fastMode: true,
+            debugMode: false
+        }
+    };
+    
+    applySettingsToForm();
+    showNotification('Settings reset to defaults', 'info');
+}
+
+// Export settings
+function exportSettings() {
+    const currentSettings = collectSettingsFromForm();
+    const exportData = {
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        settings: currentSettings
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `bmw_obd2_settings_${new Date().toISOString().slice(0, 19)}.json`;
+    link.click();
+    
+    showNotification('Settings exported successfully', 'success');
+}
+
+// Import settings
+function importSettings() {
+    document.getElementById('import-file').click();
+}
+
+// Handle file import
+document.getElementById('import-file').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importData = JSON.parse(e.target.result);
+            
+            if (importData.settings) {
+                settings = { ...settings, ...importData.settings };
+                applySettingsToForm();
+                showNotification('Settings imported successfully', 'success');
+            } else {
+                showNotification('Invalid settings file format', 'error');
+            }
+        } catch (error) {
+            console.error('Error importing settings:', error);
+            showNotification('Failed to import settings: ' + error.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+});
+
+// Update system information
+function updateSystemInfo() {
+    // Browser info
+    const browserInfo = navigator.userAgent.split(' ').slice(-2).join(' ');
+    document.getElementById('browser-info').textContent = browserInfo;
+    
+    // Screen resolution
+    document.getElementById('screen-resolution').textContent = 
+        `${screen.width} x ${screen.height}`;
+    
+    // WebSocket status
+    const wsStatus = document.getElementById('websocket-status');
+    if (window.socket && window.socket.connected) {
+        wsStatus.textContent = 'Connected';
+        wsStatus.className = 'badge bg-success';
+    } else {
+        wsStatus.textContent = 'Disconnected';
+        wsStatus.className = 'badge bg-danger';
+    }
+    
+    // Last connection
+    const lastConnection = localStorage.getItem('bmw-last-connection');
+    if (lastConnection) {
+        document.getElementById('last-connection').textContent = 
+            new Date(lastConnection).toLocaleString();
+    }
+}
+
+// Initialize settings page
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+    updateSystemInfo();
+    
+    // Update system info every 5 seconds
+    setInterval(updateSystemInfo, 5000);
+    
+    // Add change listeners to form elements for real-time validation
+    document.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('change', function() {
+            // Basic validation
+            if (this.type === 'number') {
+                const min = parseFloat(this.min);
+                const max = parseFloat(this.max);
+                const value = parseFloat(this.value);
+                
+                if (min !== undefined && value < min) {
+                    this.value = min;
+                }
+                if (max !== undefined && value > max) {
+                    this.value = max;
+                }
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.settings-card {
+    background: var(--bmw-gradient-secondary);
+    border: 1px solid var(--bmw-gray-light);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.settings-header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+    border-bottom: 1px solid var(--bmw-gray-light);
+    margin-bottom: 0;
+}
+
+.settings-body {
+    padding: 1.5rem;
+}
+
+.form-control, .form-select {
+    background: var(--bmw-gray);
+    border: 1px solid var(--bmw-gray-light);
+    color: var(--bmw-white);
+}
+
+.form-control:focus, .form-select:focus {
+    background: var(--bmw-gray);
+    border-color: var(--bmw-blue);
+    color: var(--bmw-white);
+    box-shadow: 0 0 0 0.2rem rgba(28, 105, 212, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: var(--bmw-blue);
+    border-color: var(--bmw-blue);
+}
+
+.form-check-input:focus {
+    border-color: var(--bmw-blue);
+    box-shadow: 0 0 0 0.2rem rgba(28, 105, 212, 0.25);
+}
+
+.table-borderless td {
+    border: none;
+    padding: 0.5rem 0;
+}
+
+.light-theme {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+    color: #212529;
+}
+
+.light-theme .settings-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-color: #dee2e6;
+}
+
+.light-theme .form-control,
+.light-theme .form-select {
+    background: #ffffff;
+    border-color: #ced4da;
+    color: #212529;
+}
+</style>
+{% endblock %}
