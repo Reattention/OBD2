@@ -54,6 +54,12 @@ class OBD2Config:
         self.generation = "F13"  # BMW F13 generation
         self.model_year = None
         self.engine_type = None
+        self.fuel_type = "gasoline"  # gasoline or diesel
+        self.emissions_standard = None
+        self.displacement_liters = None
+        self.cylinders = None
+        self.turbo_type = None  # twin-turbo, single-turbo, VNT
+        self.diesel_specific = {}  # Diesel-specific configuration
         
         # Logging configuration
         self.log_level = logging.INFO
@@ -90,6 +96,12 @@ class OBD2Config:
             'generation': self.generation,
             'model_year': self.model_year,
             'engine_type': self.engine_type,
+            'fuel_type': self.fuel_type,
+            'emissions_standard': self.emissions_standard,
+            'displacement_liters': self.displacement_liters,
+            'cylinders': self.cylinders,
+            'turbo_type': self.turbo_type,
+            'diesel_specific': self.diesel_specific,
             'log_level': logging.getLevelName(self.log_level),
             'log_file': self.log_file
         }
@@ -110,5 +122,25 @@ BMW_CONFIGS = {
         "engine_type": "N55",
         "protocol": Protocol.ISO_15765_4.value,
         "baudrate": 500000
+    },
+    "F13_535d": {
+        "generation": "F13",
+        "model_year": 2012,
+        "engine_type": "N57D30",
+        "protocol": Protocol.ISO_15765_4.value,
+        "baudrate": 500000,
+        "fuel_type": "diesel",
+        "emissions_standard": "Euro5",
+        "displacement_liters": 3.0,
+        "cylinders": 6,
+        "turbo_type": "VNT",
+        "diesel_specific": {
+            "dpf_equipped": True,
+            "scr_equipped": True,
+            "def_required": True,
+            "egr_equipped": True,
+            "common_rail_pressure_max": 2000,  # bar
+            "regeneration_interval_miles": 400
+        }
     }
 }

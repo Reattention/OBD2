@@ -1,0 +1,631 @@
+# BMW OBD2 Diagnostics Tool - Comprehensive Usage Guide
+
+## Overview
+
+This BMW OBD2 Diagnostics Tool provides comprehensive diagnostic capabilities for BMW vehicles, with specialized support for both gasoline and diesel engines. The tool supports real OBD2 adapter communication and includes BMW-specific features for F13 generation vehicles (6 Series Coupe/Convertible 2011-2018).
+
+## Project Structure
+
+```
+OBD2/
+├── obd2_diagnostics/           # Main package directory
+│   ├── __init__.py            # Package initialization
+│   ├── bmw_diagnostics.py     # Main BMW diagnostics interface
+│   ├── obd2_adapter.py        # OBD2 adapter communication
+│   ├── dtc_handler.py         # Diagnostic trouble code management
+│   ├── bmw_pids.py           # BMW-specific PID definitions
+│   └── config.py             # Configuration management
+├── examples/                  # Usage examples
+│   └── basic_usage.py        # Comprehensive usage example
+├── tests/                    # Test suite
+│   ├── test_bmw_diagnostics.py
+│   └── test_obd2_adapter.py
+├── requirements.txt          # Python dependencies
+├── setup.py                 # Package installation
+├── README.md               # Project documentation
+└── guide.txt              # This comprehensive guide
+```
+
+## Supported BMW Models and Engines
+
+### F13 Generation (6 Series Coupe/Convertible 2011-2018)
+
+#### Gasoline Engines:
+- **F13 650i** - N63 twin-turbo V8 4.4L (407-445 HP)
+- **F13 640i** - N55 single-turbo I6 3.0L (315-320 HP)
+
+#### Diesel Engines:
+- **F13 535d** - N57D30 single-turbo I6 3.0L diesel (313 HP)
+  - Common rail direct injection
+  - Variable Nozzle Turbo (VNT)
+  - Diesel Particulate Filter (DPF)
+  - Selective Catalytic Reduction (SCR)
+  - Diesel Exhaust Fluid (DEF/AdBlue) system
+
+## Installation and Setup
+
+### Prerequisites
+- Python 3.7 or higher
+- OBD2 adapter (ELM327, OBDLink, etc.)
+- BMW vehicle with OBD2 port (1996 or newer)
+- Vehicle ignition must be ON for diagnostics
+
+### Install Dependencies
+```bash
+cd OBD2
+pip install -r requirements.txt
+```
+
+### Install Package (Optional)
+```bash
+pip install -e .
+```
+
+## Quick Start Guide
+
+### 1. Basic Connection Test
+
+```python
+from obd2_diagnostics import BMWDiagnostics
+from obd2_diagnostics.config import OBD2Config
+
+# Create basic configuration
+config = OBD2Config()
+config.generation = "F13"
+config.bmw_extended_pids = True
+
+# Test connection
+with BMWDiagnostics(config) as diagnostics:
+    if diagnostics.connect(auto_detect=True):
+        print("✅ Successfully connected to BMW vehicle!")
+        
+        # Get basic vehicle info
+        vehicle_info = diagnostics.get_vehicle_info()
+        print(f"Generation: {vehicle_info.get('bmw_generation')}")
+        
+    else:
+        print("❌ Failed to connect to vehicle")
+```
+
+### 2. Gasoline Engine Configuration (F13 650i - N63)
+
+```python
+from obd2_diagnostics import BMWDiagnostics
+from obd2_diagnostics.config import OBD2Config
+
+config = OBD2Config()
+
+# Set gasoline engine configuration
+config.generation = "F13"
+config.engine_type = "N63"
+config.fuel_type = "gasoline"
+config.bmw_extended_pids = True
+
+diagnostics = BMWDiagnostics(config)
+
+# Or use pre-configured model
+diagnostics.set_bmw_config("F13_650i")
+```
+
+### 3. Diesel Engine Configuration (F13 535d - N57D30)
+
+```python
+from obd2_diagnostics import BMWDiagnostics
+from obd2_diagnostics.config import OBD2Config
+
+config = OBD2Config()
+
+# Set diesel engine configuration
+config.generation = "F13"
+config.engine_type = "N57D30"
+config.fuel_type = "diesel"
+config.bmw_extended_pids = True
+
+diagnostics = BMWDiagnostics(config)
+
+# Or use pre-configured diesel model
+diagnostics.set_bmw_config("F13_535d")
+```
+
+## Detailed Usage Instructions
+
+### Live Data Monitoring
+
+#### Basic Live Data
+```python
+with BMWDiagnostics(config) as diagnostics:
+    if diagnostics.connect():
+        # Get live data
+        live_data = diagnostics.get_live_data(refresh=True)
+        
+        # Access engine data
+        data = live_data.get('data', {})
+        if 'RPM' in data:
+            rpm_info = data['RPM']
+            print(f"RPM: {rpm_info['value']} {rpm_info['unit']}")
+            print(f"BMW Analysis: {rpm_info['bmw_interpretation']}")
+        
+        if 'COOLANT_TEMP' in data:
+            temp_info = data['COOLANT_TEMP']
+            print(f"Coolant: {temp_info['value']}°C")
+            print(f"Status: {temp_info['bmw_interpretation']}")
+```
+
+#### Diesel-Specific Live Data
+```python
+# For N57D30 diesel engines, additional data available:
+with BMWDiagnostics(config) as diagnostics:
+    diagnostics.set_bmw_config("F13_535d")
+    
+    if diagnostics.connect():
+        live_data = diagnostics.get_live_data()
+        
+        # Diesel-specific BMW data
+        bmw_data = live_data.get('bmw_specific', {})
+        if bmw_data:
+            print(f"Turbo Boost: {bmw_data.get('turbo_boost_target')} bar")
+            print(f"Fuel Rail Pressure: {bmw_data.get('fuel_rail_pressure')} bar")
+            
+        # Check for diesel-specific notes in standard PIDs
+        data = live_data.get('data', {})
+        if 'FUEL_PRESSURE' in data:
+            fuel_info = data['FUEL_PRESSURE']
+            print(f"Diesel Notes: {fuel_info.get('diesel_notes', 'N/A')}")
+```
+
+### Diagnostic Trouble Codes (DTCs)
+
+#### Reading DTCs
+```python
+with BMWDiagnostics(config) as diagnostics:
+    if diagnostics.connect():
+        # Get all DTCs
+        dtc_info = diagnostics.get_dtcs()
+        
+        # Check status
+        status = dtc_info.get('status', {})
+        print(f"MIL Status: {'ON' if status.get('mil_on') else 'OFF'}")
+        print(f"Total DTCs: {status.get('total_dtcs', 0)}")
+        
+        # List DTCs
+        dtcs = dtc_info.get('dtcs', [])
+        for dtc in dtcs:
+            print(f"{dtc['code']}: {dtc['description']}")
+            print(f"  Severity: {dtc['severity']}")
+            print(f"  BMW Specific: {dtc['bmw_specific']}")
+```
+
+#### Diesel-Specific DTC Analysis
+```python
+# Diesel engines have additional DTC categories:
+with BMWDiagnostics(config) as diagnostics:
+    diagnostics.set_bmw_config("F13_535d")
+    
+    if diagnostics.connect():
+        dtc_info = diagnostics.get_dtcs()
+        analysis = dtc_info.get('analysis', {})
+        
+        # Check for diesel-specific priority issues
+        priority_issues = analysis.get('priority_issues', [])
+        for issue in priority_issues:
+            code = issue.get('code')
+            if code in ['P2002', 'P2463', 'P0401', 'P20EE', 'P229F']:
+                print(f"Diesel Priority: {code} - {issue.get('reason')}")
+        
+        # Get diesel-specific recommendations
+        recommendations = analysis.get('recommendations', [])
+        for rec in recommendations:
+            if any(keyword in rec.lower() for keyword in ['dpf', 'def', 'egr', 'turbo', 'nox']):
+                print(f"Diesel Recommendation: {rec}")
+```
+
+#### Clearing DTCs
+```python
+with BMWDiagnostics(config) as diagnostics:
+    if diagnostics.connect():
+        # Read DTCs first
+        dtc_info = diagnostics.get_dtcs()
+        print(f"Found {len(dtc_info.get('dtcs', []))} DTCs")
+        
+        # Clear DTCs (only after repairs!)
+        if input("Clear DTCs? (y/N): ").lower() == 'y':
+            if diagnostics.clear_dtcs():
+                print("✅ DTCs cleared successfully")
+            else:
+                print("❌ Failed to clear DTCs")
+```
+
+### OBD2 Readiness Tests
+
+```python
+with BMWDiagnostics(config) as diagnostics:
+    if diagnostics.connect():
+        # Perform readiness test
+        readiness = diagnostics.perform_readiness_test()
+        
+        if 'error' not in readiness:
+            print(f"MIL Status: {readiness.get('mil_status')}")
+            print(f"DTC Count: {readiness.get('dtc_count')}")
+            
+            # Check individual monitors
+            monitors = readiness.get('monitors', {})
+            for name, status in monitors.items():
+                available = status.get('available', False)
+                complete = status.get('complete', False)
+                status_text = 'Complete' if complete else ('Ready' if available else 'Not Available')
+                print(f"  {name}: {status_text}")
+```
+
+### Advanced Configuration
+
+#### Custom Adapter Settings
+```python
+from obd2_diagnostics.config import OBD2Config, AdapterType, Protocol
+
+config = OBD2Config()
+
+# Specific adapter configuration
+config.adapter_type = AdapterType.ELM327
+config.port = "/dev/ttyUSB0"  # Linux/Mac
+# config.port = "COM3"        # Windows
+config.baudrate = 38400
+config.timeout = 10.0
+
+# Protocol selection
+config.protocol = Protocol.ISO_15765_4  # CAN bus for modern BMWs
+config.fast_mode = True
+
+# Error handling
+config.retry_attempts = 3
+config.reconnect_delay = 2.0
+```
+
+#### Diesel-Specific Configuration
+```python
+config = OBD2Config()
+
+# Load F13 535d configuration
+config.from_dict({
+    "generation": "F13",
+    "model_year": 2012,
+    "engine_type": "N57D30",
+    "fuel_type": "diesel",
+    "emissions_standard": "Euro5",
+    "displacement_liters": 3.0,
+    "cylinders": 6,
+    "turbo_type": "VNT",
+    "diesel_specific": {
+        "dpf_equipped": True,
+        "scr_equipped": True,
+        "def_required": True,
+        "egr_equipped": True,
+        "common_rail_pressure_max": 2000,
+        "regeneration_interval_miles": 400
+    }
+})
+```
+
+## Running Examples
+
+### Basic Usage Example
+```bash
+cd examples
+python basic_usage.py
+```
+
+This example demonstrates:
+- Connection to BMW vehicle
+- Live data monitoring
+- DTC reading and analysis
+- Readiness testing
+- Comprehensive diagnostic summary
+
+### Custom Scripts
+
+#### Continuous Monitoring Script
+```python
+import time
+from obd2_diagnostics import BMWDiagnostics
+from obd2_diagnostics.config import OBD2Config
+
+config = OBD2Config()
+config.generation = "F13"
+
+with BMWDiagnostics(config) as diagnostics:
+    diagnostics.set_bmw_config("F13_535d")  # For diesel
+    
+    if diagnostics.connect():
+        print("Starting continuous monitoring...")
+        
+        try:
+            while True:
+                live_data = diagnostics.get_live_data(refresh=True)
+                data = live_data.get('data', {})
+                
+                # Display key parameters
+                if 'RPM' in data:
+                    rpm = data['RPM']['value']
+                    print(f"RPM: {rpm:4.0f}", end=" | ")
+                
+                if 'COOLANT_TEMP' in data:
+                    temp = data['COOLANT_TEMP']['value']
+                    print(f"Temp: {temp:3.0f}°C", end=" | ")
+                
+                if 'ENGINE_LOAD' in data:
+                    load = data['ENGINE_LOAD']['value']
+                    print(f"Load: {load:3.0f}%", end=" | ")
+                
+                print(f"Time: {live_data.get('timestamp', '')[:19]}")
+                
+                time.sleep(1)
+                
+        except KeyboardInterrupt:
+            print("\nMonitoring stopped")
+```
+
+## Diesel Engine Specific Features
+
+### N57D30 Diesel Engine Support
+
+The N57D30 is BMW's 3.0L inline-6 diesel engine used in the F13 535d. This implementation includes:
+
+#### Diesel Particulate Filter (DPF) Monitoring
+- **P2002**: DPF efficiency below threshold
+- **P2463**: DPF soot accumulation
+- **P244A/P244B**: DPF pressure differential issues
+
+```python
+# Monitor DPF status
+with BMWDiagnostics(config) as diagnostics:
+    diagnostics.set_bmw_config("F13_535d")
+    if diagnostics.connect():
+        dtc_info = diagnostics.get_dtcs()
+        
+        # Check for DPF-related codes
+        dpf_codes = [dtc for dtc in dtc_info.get('dtcs', []) 
+                    if dtc['code'].startswith('P2') and 'Particulate' in dtc['description']]
+        
+        if dpf_codes:
+            print("⚠️ DPF Issues Detected:")
+            for dtc in dpf_codes:
+                print(f"  {dtc['code']}: {dtc['description']}")
+```
+
+#### NOx Emission System
+- **P20EE**: SCR NOx catalyst efficiency
+- **P2200-P2209**: NOx sensor circuits
+
+#### DEF/AdBlue System
+- **P229F**: DEF pump control
+- **P204F**: Reductant system performance
+- **P205B-P205E**: DEF level sensors
+
+#### Variable Nozzle Turbo (VNT)
+- **P2563-P2566**: Turbo position sensor
+- **P0045-P0048**: Boost control solenoid
+
+#### EGR System
+- **P0401/P0402**: EGR flow insufficient/excessive
+- **P0403-P0408**: EGR circuit issues
+
+### Diesel Maintenance Reminders
+
+```python
+def check_diesel_maintenance(diagnostics):
+    """Check diesel-specific maintenance items"""
+    live_data = diagnostics.get_live_data()
+    dtc_info = diagnostics.get_dtcs()
+    
+    recommendations = []
+    
+    # Check for DPF regeneration needs
+    dpf_codes = [dtc['code'] for dtc in dtc_info.get('dtcs', []) 
+                if dtc['code'] in ['P2002', 'P2463']]
+    if dpf_codes:
+        recommendations.append("DPF regeneration required - perform highway driving or forced regen")
+    
+    # Check DEF level (simulated - would be actual PID in real implementation)
+    def_level = 75  # Would be actual reading
+    if def_level < 20:
+        recommendations.append(f"DEF level low ({def_level}%) - refill AdBlue")
+    
+    return recommendations
+```
+
+## Troubleshooting
+
+### Connection Issues
+
+#### No Adapter Found
+1. Check USB/Bluetooth connection
+2. Verify adapter drivers are installed
+3. Try different USB ports
+4. Re-pair Bluetooth devices
+
+```bash
+# Check available ports (Linux/Mac)
+ls /dev/tty*
+
+# Check available ports (Windows)
+# Use Device Manager > Ports (COM & LPT)
+```
+
+#### Connection Timeout
+1. Increase timeout in configuration
+2. Ensure vehicle ignition is ON
+3. Check OBD2 port for damage
+4. Try different adapter
+
+```python
+config = OBD2Config()
+config.timeout = 15.0  # Increase timeout
+config.retry_attempts = 5  # More retries
+```
+
+#### Protocol Not Supported
+1. Try AUTO protocol detection
+2. Check adapter compatibility
+3. Some older BMWs may need specific protocols
+
+```python
+config.protocol = Protocol.AUTO  # Let system detect
+```
+
+### Data Issues
+
+#### No Response from ECU
+1. Vehicle may be in sleep mode
+2. Turn on accessories/start engine
+3. Check OBD2 fuse
+
+#### Incomplete Data
+1. Some PIDs may not be supported by vehicle
+2. BMW-specific PIDs need proper implementation
+3. Check generation compatibility
+
+```python
+# Check supported commands
+with BMWDiagnostics(config) as diagnostics:
+    if diagnostics.connect():
+        vehicle_info = diagnostics.get_vehicle_info()
+        supported = vehicle_info.get('supported_commands', 0)
+        print(f"Vehicle supports {supported} OBD2 commands")
+```
+
+### Diesel-Specific Issues
+
+#### DPF Regeneration Problems
+- **Symptoms**: P2002, P2463 codes, reduced power
+- **Solutions**: 
+  - Highway driving at 2000+ RPM for 20+ minutes
+  - Forced regeneration with BMW diagnostic tools
+  - DPF cleaning or replacement
+
+#### DEF System Issues
+- **Symptoms**: P229F, P204F codes, engine derating warnings
+- **Solutions**:
+  - Check DEF fluid level and quality
+  - Verify DEF pump operation
+  - Check for crystallized DEF in lines
+
+#### EGR Problems
+- **Symptoms**: P0401, P0402 codes, rough idle
+- **Solutions**:
+  - Clean EGR valve and passages
+  - Check vacuum lines
+  - Verify EGR position sensor
+
+### BMW-Specific Notes
+
+#### F13 Generation
+- Full diagnostic support implemented
+- Compatible with most 2011-2018 F13 models
+- CAN bus communication required
+
+#### Engine Differences
+- **N63 (650i)**: Twin-turbo gasoline, complex cooling
+- **N55 (640i)**: Single-turbo gasoline, Valvetronic
+- **N57D30 (535d)**: Single VNT turbo diesel, DPF/SCR
+
+#### iDrive Integration
+- Some advanced features may require BMW tools
+- Basic OBD2 functions work with this tool
+- Climate and comfort systems may have limited access
+
+## Testing
+
+### Run Test Suite
+```bash
+# Run all tests
+python -m unittest discover tests -v
+
+# Run specific tests
+python -m unittest tests.test_bmw_diagnostics -v
+python -m unittest tests.test_obd2_adapter -v
+```
+
+### Manual Testing
+```bash
+# Test basic functionality
+cd examples
+python basic_usage.py
+
+# Test with specific configuration
+python -c "
+from obd2_diagnostics import BMWDiagnostics
+from obd2_diagnostics.config import OBD2Config
+
+config = OBD2Config()
+config.port = '/dev/null'  # Test port
+diagnostics = BMWDiagnostics(config)
+print('Initialization successful')
+"
+```
+
+## File Organization Explanation
+
+### Core Modules
+- **bmw_diagnostics.py**: Main interface class with high-level diagnostic functions
+- **obd2_adapter.py**: Low-level OBD2 communication and adapter management
+- **dtc_handler.py**: DTC reading, clearing, and analysis with BMW-specific interpretations
+- **bmw_pids.py**: BMW-specific PID definitions and decoders for F13 generation
+- **config.py**: Configuration management for different BMW models and adapters
+
+### Why This Structure?
+1. **Separation of Concerns**: Each module handles a specific aspect of diagnostics
+2. **Maintainability**: Easy to update individual components
+3. **Extensibility**: New BMW generations or features can be added easily
+4. **Testing**: Each module can be tested independently
+5. **Reusability**: Components can be reused for different BMW models
+
+### Module Dependencies
+```
+bmw_diagnostics.py (main interface)
+├── config.py (configuration)
+├── obd2_adapter.py (communication)
+├── dtc_handler.py (DTC management)
+└── bmw_pids.py (BMW-specific data)
+```
+
+## Configuration Examples
+
+### Development/Testing
+```python
+config = OBD2Config()
+config.port = None  # Auto-detect
+config.timeout = 5.0  # Shorter for testing
+config.log_level = logging.DEBUG  # Verbose logging
+config.log_file = 'debug.log'
+```
+
+### Production Use
+```python
+config = OBD2Config()
+config.port = "/dev/ttyUSB0"  # Known good port
+config.timeout = 10.0  # Stable timeout
+config.retry_attempts = 3  # Reliable reconnection
+config.fast_mode = True  # Optimal performance
+```
+
+### Diesel Engine Focus
+```python
+config = OBD2Config()
+config.generation = "F13"
+config.engine_type = "N57D30"
+config.fuel_type = "diesel"
+config.bmw_extended_pids = True  # Enable diesel PIDs
+```
+
+## Summary
+
+This BMW OBD2 Diagnostics Tool provides comprehensive support for BMW F13 generation vehicles with both gasoline and diesel engines. The N57D30 diesel engine support includes specialized PIDs for DPF, EGR, NOx sensors, DEF system, and VNT turbocharger monitoring.
+
+Key features:
+- Real OBD2 adapter communication
+- BMW-specific PID interpretations
+- Comprehensive DTC database including diesel codes
+- Pre-configured BMW model settings
+- Extensive error handling and reconnection
+- Detailed diagnostic analysis and recommendations
+
+For additional support or questions, refer to the README.md file or examine the example scripts in the examples/ directory.
